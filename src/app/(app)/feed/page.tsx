@@ -7,31 +7,34 @@ export const dynamic = 'force-dynamic'
 
 type Tab = 'all' | 'clans' | 'lfg'
 
-interface PageProps {
-  searchParams: { tab?: Tab }
-}
-
-export default async function FeedPage({ searchParams }: PageProps) {
+export default async function FeedPage({ searchParams }: { searchParams: { tab?: Tab } }) {
   const session = await auth()
   const tab = searchParams.tab ?? 'all'
-  const userId = session!.user!.id ?? ''
+  const userId = (session?.user?.id ?? '').replace(/'/g, "''")
 
   let whereClause = ''
   if (tab === 'clans') whereClause = `WHERE p.type = 'clan'`
   else if (tab === 'lfg') whereClause = `WHERE p.type = 'lfg'`
 
-  const result = await db.execute(
-    `SELECT p.*, u.username, u.psn_id, u.avatar_url,
-            c.name as clan_name, c.tag as clan_tag,
-            (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
-            (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count,
-            (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND user_id = '${userId}') as user_liked
-     FROM posts p
-     JOIN users u ON u.id = p.user_id
-     LEFT JOIN clans c ON c.id = p.clan_id
-     ${whereClause}
-     ORDER BY p.created_at DESC LIMIT 30`
-  )
+  let posts: any[] = []
+
+  try {
+    const result = await db.execute(
+      `SELECT p.*, u.username, u.psn_id, u.avatar_url,
+              c.name as clan_name, c.tag as clan_tag,
+              (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+              (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count,
+              (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND user_id = '${userId}') as user_liked
+       FROM posts p
+       JOIN users u ON u.id = p.user_id
+       LEFT JOIN clans c ON c.id = p.clan_id
+       ${whereClause}
+       ORDER BY p.created_at DESC LIMIT 30`
+    )
+    posts = result.rows
+  } catch (e) {
+    console.error('Feed fetch error:', e)
+  }
 
   return (
     <div className="space-y-4">
@@ -53,17 +56,13 @@ export default async function FeedPage({ searchParams }: PageProps) {
         ))}
       </div>
 
-      {result.rows.length === 0 ? (
+      {posts.length === 0 ? (
         <div className="text-center py-16 text-neutral-600 text-sm">
           Nenhum post ainda. Seja o primeiro!
         </div>
       ) : (
-        result.rows.map(post => (
-          <PostCard
-            key={post.id as string}
-            post={post as any}
-            currentUserId={userId}
-          />
+        posts.map(post => (
+          <PostCard key={post.id as string} post={post as any} currentUserId={userId} />
         ))
       )}
     </div>

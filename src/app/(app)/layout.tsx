@@ -8,21 +8,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await auth()
   if (!session?.user) redirect('/auth/login')
 
-  const userId = session.user.id ?? ''
+  const userId = (session.user.id ?? '').replace(/'/g, "''")
 
-  const clansResult = await db.execute(
-    `SELECT c.id, c.name, c.tag
-     FROM clans c
-     JOIN clan_members cm ON cm.clan_id = c.id
-     WHERE cm.user_id = '${userId}'
-     LIMIT 10`
-  )
+  let userClans: { id: string; name: string; tag: string }[] = []
 
-  const userClans = clansResult.rows.map(r => ({
-    id: r.id as string,
-    name: r.name as string,
-    tag: r.tag as string,
-  }))
+  try {
+    const clansResult = await db.execute(
+      `SELECT c.id, c.name, c.tag
+       FROM clans c
+       JOIN clan_members cm ON cm.clan_id = c.id
+       WHERE cm.user_id = '${userId}'
+       LIMIT 10`
+    )
+    userClans = clansResult.rows.map(r => ({
+      id: r.id as string,
+      name: r.name as string,
+      tag: r.tag as string,
+    }))
+  } catch (e) {
+    console.error('Layout clan fetch error:', e)
+  }
 
   return (
     <>
