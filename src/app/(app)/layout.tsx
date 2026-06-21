@@ -8,14 +8,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await auth()
   if (!session?.user) redirect('/auth/login')
 
-  const clansResult = await db.execute({
-    sql: `SELECT c.id, c.name, c.tag
-          FROM clans c
-          JOIN clan_members cm ON cm.clan_id = c.id
-          WHERE cm.user_id = ?
-          LIMIT 10`,
-    args: [session.user.id],
-  })
+  const userId = session.user.id ?? ''
+
+  const clansResult = await db.execute(
+    `SELECT c.id, c.name, c.tag
+     FROM clans c
+     JOIN clan_members cm ON cm.clan_id = c.id
+     WHERE cm.user_id = '${userId}'
+     LIMIT 10`
+  )
 
   const userClans = clansResult.rows.map(r => ({
     id: r.id as string,

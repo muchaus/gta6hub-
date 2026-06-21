@@ -9,29 +9,28 @@ export const dynamic = 'force-dynamic'
 
 export default async function PostPage({ params }: { params: { id: string } }) {
   const session = await auth()
+  const id = params.id.replace(/'/g, "''")
 
-  const postRes = await db.execute({
-    sql: `SELECT p.*, u.username, u.psn_id,
-                 c.name as clan_name, c.tag as clan_tag,
-                 (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count
-          FROM posts p
-          JOIN users u ON u.id = p.user_id
-          LEFT JOIN clans c ON c.id = p.clan_id
-          WHERE p.id = ?`,
-    args: [params.id],
-  })
+  const postRes = await db.execute(
+    `SELECT p.*, u.username, u.psn_id,
+            c.name as clan_name, c.tag as clan_tag,
+            (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count
+     FROM posts p
+     JOIN users u ON u.id = p.user_id
+     LEFT JOIN clans c ON c.id = p.clan_id
+     WHERE p.id = '${id}'`
+  )
 
   if (!postRes.rows[0]) notFound()
   const post = postRes.rows[0]
 
-  const commentsRes = await db.execute({
-    sql: `SELECT cm.*, u.username
-          FROM comments cm
-          JOIN users u ON u.id = cm.user_id
-          WHERE cm.post_id = ?
-          ORDER BY cm.created_at ASC`,
-    args: [params.id],
-  })
+  const commentsRes = await db.execute(
+    `SELECT cm.*, u.username
+     FROM comments cm
+     JOIN users u ON u.id = cm.user_id
+     WHERE cm.post_id = '${id}'
+     ORDER BY cm.created_at ASC`
+  )
   const comments = commentsRes.rows
 
   return (
@@ -61,7 +60,6 @@ export default async function PostPage({ params }: { params: { id: string } }) {
 
         {post.psn_id && (
           <div className="mt-4 inline-flex items-center gap-1.5 bg-[#0a2035] border border-[#1a3a5a] rounded-full px-3 py-1 text-xs text-[#5b9fd4]">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8.985 2.596v17.548l3.915 1.261V6.688c0-.69.304-1.151.794-.999.636.198.762.89.762 1.58v5.584l3.915 1.256V7.522c0-3.294-2.024-4.83-4.954-3.753z"/><path d="M.006 17.34l4.141 1.738L13.012 21v-3.165l-5.987-2.135-.007-2.18L13.012 15V11.87L.006 7.598z"/></svg>
             PSN: {post.psn_id as string}
           </div>
         )}

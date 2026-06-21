@@ -7,19 +7,19 @@ export const dynamic = 'force-dynamic'
 
 export default async function ClansPage({ searchParams }: { searchParams: { q?: string } }) {
   const session = await auth()
-  const q = searchParams.q ?? ''
+  const q = (searchParams.q ?? '').replace(/'/g, "''")
+  const userId = session!.user!.id ?? ''
 
-  const clansRes = await db.execute({
-    sql: `SELECT c.*, u.username as owner_name,
-                 (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id) as members_count,
-                 (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id AND user_id = ?) as is_member
-          FROM clans c
-          JOIN users u ON u.id = c.owner_id
-          WHERE c.name LIKE ? OR c.tag LIKE ?
-          ORDER BY members_count DESC
-          LIMIT 30`,
-    args: [session!.user!.id, `%${q}%`, `%${q}%`],
-  })
+  const clansRes = await db.execute(
+    `SELECT c.*, u.username as owner_name,
+             (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id) as members_count,
+             (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id AND user_id = '${userId}') as is_member
+      FROM clans c
+      JOIN users u ON u.id = c.owner_id
+      WHERE c.name LIKE '%${q}%' OR c.tag LIKE '%${q}%'
+      ORDER BY members_count DESC
+      LIMIT 30`
+  )
 
   return (
     <div className="space-y-4">
