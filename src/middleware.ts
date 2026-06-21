@@ -1,29 +1,31 @@
-import { auth } from '@/lib/auth'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
 const PUBLIC_ROUTES = ['/', '/auth/login', '/auth/register']
 const AUTH_ROUTES = ['/auth/login', '/auth/register']
 
-export default auth((req) => {
-  const { nextUrl, auth: session } = req
-  const isLoggedIn = !!session
+export async function middleware(req: NextRequest) {
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET,
+  })
 
-  const isPublic = PUBLIC_ROUTES.includes(nextUrl.pathname)
-  const isAuthRoute = AUTH_ROUTES.includes(nextUrl.pathname)
+  const { pathname } = req.nextUrl
+  const isLoggedIn = !!token
+  const isAuthRoute = AUTH_ROUTES.some(r => pathname.startsWith(r))
+  const isPublic = PUBLIC_ROUTES.some(r => pathname === r)
 
-  // Usuário logado tentando acessar login/register → redireciona pro feed
   if (isLoggedIn && isAuthRoute) {
-    return NextResponse.redirect(new URL('/feed', nextUrl))
+    return NextResponse.redirect(new URL('/feed', req.url))
   }
 
-  // Rota privada sem sessão → redireciona pro login
-  if (!isLoggedIn && !isPublic) {
-    return NextResponse.redirect(new URL('/auth/login', nextUrl))
+  if (!isLoggedIn && !isPublic && !pathname.startsWith('/api')) {
+    return NextResponse.redirect(new URL('/auth/login', req.url))
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
