@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 export default async function ProfilePage({ params }: { params: { username: string } }) {
   const session = await auth()
   const isMe = params.username === 'me'
-  const targetUsername = (isMe ? (session?.user?.name ?? ''): (params.username ?? '')).replace(/'/g, "''")
+  const targetUsername = (isMe ? (session?.user?.name ?? '') : (params.username ?? '')).replace(/'/g, "''")
   const userId = session?.user?.id ?? ''
 
   const userRes = await db.execute(
@@ -41,19 +41,30 @@ export default async function ProfilePage({ params }: { params: { username: stri
   )
 
   const isOwn = userId === uid
+  const avatarUrl = user.avatar_url as string | null
+  const initials = (user.username as string).slice(0, 2).toUpperCase()
 
   return (
     <div className="max-w-2xl space-y-6">
       <div className="bg-[#13131d] border border-[#1e1e2e] rounded-xl p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-[#1a1628] flex items-center justify-center text-xl font-medium text-[#9f8fdd]">
-              {(user.username as string).slice(0, 2).toUpperCase()}
-            </div>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={user.username as string}
+                className="w-16 h-16 rounded-full object-cover border border-[#2d2050]"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-[#1a1628] flex items-center justify-center text-xl font-medium text-[#9f8fdd]">
+                {initials}
+              </div>
+            )}
             <div>
               <h1 className="text-lg font-medium text-neutral-100">{user.username as string}</h1>
               {user.psn_id && (
                 <div className="mt-1 inline-flex items-center gap-1.5 bg-[#0a2035] border border-[#1a3a5a] rounded-full px-3 py-1 text-xs text-[#5b9fd4]">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8.985 2.596v17.548l3.915 1.261V6.688c0-.69.304-1.151.794-.999.636.198.762.89.762 1.58v5.584l3.915 1.256V7.522c0-3.294-2.024-4.83-4.954-3.753z"/><path d="M.006 17.34l4.141 1.738L13.012 21v-3.165l-5.987-2.135-.007-2.18L13.012 15V11.87L.006 7.598z"/></svg>
                   PSN: {user.psn_id as string}
                 </div>
               )}
