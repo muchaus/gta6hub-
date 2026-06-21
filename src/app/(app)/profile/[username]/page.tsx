@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 export default async function ProfilePage({ params }: { params: { username: string } }) {
   const session = await auth()
   const isMe = params.username === 'me'
-  const targetUsername = (isMe ? session?.user?.name : params.username ?? '').replace(/'/g, "''")
+  const targetUsername = (isMe ? (session?.user?.name ?? ''): (params.username ?? '')).replace(/'/g, "''")
   const userId = session?.user?.id ?? ''
 
   const userRes = await db.execute(
