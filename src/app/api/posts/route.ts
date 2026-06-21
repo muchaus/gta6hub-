@@ -14,18 +14,23 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const body = await req.json()
-  const parsed = postSchema.safeParse(body)
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
+  try {
+    const body = await req.json()
+    const parsed = postSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
+
+    const { title, content, type, clan_id } = parsed.data
+    const userId = (session.user.id ?? '').replace(/'/g, "''")
+    const safeTitle = title.replace(/'/g, "''")
+    const safeContent = content.replace(/'/g, "''")
+    const clanClause = clan_id ? `'${clan_id}'` : 'NULL'
+
+    await db.execute(
+      `INSERT INTO posts (user_id, title, content, type, clan_id) VALUES ('${userId}', '${safeTitle}', '${safeContent}', '${type}', ${clanClause})`
+    )
+
+    return NextResponse.json({ ok: true }, { status: 201 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
-
-  const { title, content, type, clan_id } = parsed.data
-
-  await db.execute({
-    sql: `INSERT INTO posts (user_id, title, content, type, clan_id) VALUES (?, ?, ?, ?, ?)`,
-    args: [session.user.id, title, content, type, clan_id ?? null],
-  })
-
-  return NextResponse.json({ ok: true }, { status: 201 })
 }

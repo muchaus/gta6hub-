@@ -12,14 +12,21 @@ export async function POST(
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const body = await req.json()
-  const parsed = schema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: 'Comentário inválido' }, { status: 400 })
+  try {
+    const body = await req.json()
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: 'Comentário inválido' }, { status: 400 })
 
-  await db.execute({
-    sql: `INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)`,
-    args: [params.id, session.user.id, parsed.data.content],
-  })
+    const postId = params.id.replace(/'/g, "''")
+    const userId = (session.user.id ?? '').replace(/'/g, "''")
+    const content = parsed.data.content.replace(/'/g, "''")
 
-  return NextResponse.json({ ok: true }, { status: 201 })
+    await db.execute(
+      `INSERT INTO comments (post_id, user_id, content) VALUES ('${postId}', '${userId}', '${content}')`
+    )
+
+    return NextResponse.json({ ok: true }, { status: 201 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }

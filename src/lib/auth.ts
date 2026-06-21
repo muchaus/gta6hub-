@@ -11,9 +11,7 @@ const loginSchema = z.object({
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: 'jwt' },
-  pages: {
-    signIn: '/auth/login',
-  },
+  pages: { signIn: '/auth/login' },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -43,12 +41,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!parsed.success) return null
 
         const { email, password } = parsed.data
+        const safeEmail = email.replace(/'/g, "''")
 
-        const result = await db.execute({
-          sql: 'SELECT * FROM users WHERE email = ?',
-          args: [email],
-        })
-
+        const result = await db.execute(`SELECT * FROM users WHERE email = '${safeEmail}'`)
         const user = result.rows[0]
         if (!user) return null
 

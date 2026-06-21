@@ -12,14 +12,21 @@ export async function PATCH(req: NextRequest) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const body = await req.json()
-  const parsed = schema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 })
+  try {
+    const body = await req.json()
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 })
 
-  await db.execute({
-    sql: `UPDATE users SET psn_id = ?, bio = ? WHERE id = ?`,
-    args: [parsed.data.psn_id ?? null, parsed.data.bio ?? null, session.user.id],
-  })
+    const userId = (session.user.id ?? '').replace(/'/g, "''")
+    const psn = (parsed.data.psn_id ?? '').replace(/'/g, "''")
+    const bio = (parsed.data.bio ?? '').replace(/'/g, "''")
 
-  return NextResponse.json({ ok: true })
+    await db.execute(
+      `UPDATE users SET psn_id = '${psn}', bio = '${bio}' WHERE id = '${userId}'`
+    )
+
+    return NextResponse.json({ ok: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }

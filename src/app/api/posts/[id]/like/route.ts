@@ -9,24 +9,22 @@ export async function POST(
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const { id } = params
+  const postId = params.id.replace(/'/g, "''")
+  const userId = (session.user.id ?? '').replace(/'/g, "''")
 
-  const existing = await db.execute({
-    sql: `SELECT id FROM post_likes WHERE post_id = ? AND user_id = ?`,
-    args: [id, session.user.id],
-  })
+  try {
+    const existing = await db.execute(
+      `SELECT id FROM post_likes WHERE post_id = '${postId}' AND user_id = '${userId}'`
+    )
 
-  if (existing.rows.length > 0) {
-    await db.execute({
-      sql: `DELETE FROM post_likes WHERE post_id = ? AND user_id = ?`,
-      args: [id, session.user.id],
-    })
-  } else {
-    await db.execute({
-      sql: `INSERT INTO post_likes (post_id, user_id) VALUES (?, ?)`,
-      args: [id, session.user.id],
-    })
+    if (existing.rows.length > 0) {
+      await db.execute(`DELETE FROM post_likes WHERE post_id = '${postId}' AND user_id = '${userId}'`)
+    } else {
+      await db.execute(`INSERT INTO post_likes (post_id, user_id) VALUES ('${postId}', '${userId}')`)
+    }
+
+    return NextResponse.json({ ok: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
-
-  return NextResponse.json({ ok: true })
 }
