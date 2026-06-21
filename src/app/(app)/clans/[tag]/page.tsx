@@ -10,41 +10,39 @@ export const dynamic = 'force-dynamic'
 export default async function ClanPage({ params }: { params: { tag: string } }) {
   const session = await auth()
   const tag = params.tag.toUpperCase()
+  const userId = session!.user!.id ?? ''
 
-  const clanRes = await db.execute({
-    sql: `SELECT c.*, u.username as owner_name,
-                 (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id) as members_count,
-                 (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id AND user_id = ?) as is_member
-          FROM clans c JOIN users u ON u.id = c.owner_id
-          WHERE c.tag = ?`,
-    args: [session!.user!.id, tag],
-  })
+  const clanRes = await db.execute(
+    `SELECT c.*, u.username as owner_name,
+             (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id) as members_count,
+             (SELECT COUNT(*) FROM clan_members WHERE clan_id = c.id AND user_id = '${userId}') as is_member
+      FROM clans c JOIN users u ON u.id = c.owner_id
+      WHERE c.tag = '${tag}'`
+  )
 
   if (!clanRes.rows[0]) notFound()
   const clan = clanRes.rows[0]
 
-  const membersRes = await db.execute({
-    sql: `SELECT u.id, u.username, u.psn_id, cm.role
-          FROM clan_members cm JOIN users u ON u.id = cm.user_id
-          WHERE cm.clan_id = ?
-          ORDER BY cm.role = 'owner' DESC, cm.joined_at ASC
-          LIMIT 20`,
-    args: [clan.id],
-  })
+  const membersRes = await db.execute(
+    `SELECT u.id, u.username, u.psn_id, cm.role
+      FROM clan_members cm JOIN users u ON u.id = cm.user_id
+      WHERE cm.clan_id = '${clan.id}'
+      ORDER BY cm.joined_at ASC
+      LIMIT 20`
+  )
 
-  const postsRes = await db.execute({
-    sql: `SELECT p.*, u.username, u.psn_id, u.avatar_url,
-                 c.name as clan_name, c.tag as clan_tag,
-                 (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
-                 (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count,
-                 (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND user_id = ?) as user_liked
-          FROM posts p
-          JOIN users u ON u.id = p.user_id
-          LEFT JOIN clans c ON c.id = p.clan_id
-          WHERE p.clan_id = ?
-          ORDER BY p.created_at DESC LIMIT 20`,
-    args: [session!.user!.id, clan.id],
-  })
+  const postsRes = await db.execute(
+    `SELECT p.*, u.username, u.psn_id, u.avatar_url,
+             c.name as clan_name, c.tag as clan_tag,
+             (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes_count,
+             (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count,
+             (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND user_id = '${userId}') as user_liked
+      FROM posts p
+      JOIN users u ON u.id = p.user_id
+      LEFT JOIN clans c ON c.id = p.clan_id
+      WHERE p.clan_id = '${clan.id}'
+      ORDER BY p.created_at DESC LIMIT 20`
+  )
 
   return (
     <div className="space-y-6">
@@ -103,7 +101,7 @@ export default async function ClanPage({ params }: { params: { tag: string } }) 
           <p className="text-sm text-neutral-700 text-center py-8">Nenhum post ainda.</p>
         ) : (
           postsRes.rows.map(post => (
-            <PostCard key={post.id as string} post={post as any} currentUserId={session!.user!.id} />
+            <PostCard key={post.id as string} post={post as any} currentUserId={userId} />
           ))
         )}
       </div>
