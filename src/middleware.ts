@@ -1,25 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
 
-const PUBLIC_ROUTES = ['/', '/auth/login', '/auth/register']
-const AUTH_ROUTES = ['/auth/login', '/auth/register']
+const PUBLIC_PATHS = ['/', '/auth/login', '/auth/register']
 
-export async function middleware(req: NextRequest) {
-  const token = await getToken({
-    req,
-    secret: process.env.AUTH_SECRET,
-  })
-
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const isLoggedIn = !!token
-  const isAuthRoute = AUTH_ROUTES.some(r => pathname.startsWith(r))
-  const isPublic = PUBLIC_ROUTES.some(r => pathname === r)
 
-  if (isLoggedIn && isAuthRoute) {
-    return NextResponse.redirect(new URL('/feed', req.url))
+  // Deixa passar rotas públicas e API
+  if (
+    PUBLIC_PATHS.includes(pathname) ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon')
+  ) {
+    return NextResponse.next()
   }
 
-  if (!isLoggedIn && !isPublic && !pathname.startsWith('/api')) {
+  // Verifica se tem cookie de sessão do NextAuth v5
+  const sessionToken =
+    req.cookies.get('authjs.session-token')?.value ||
+    req.cookies.get('__Secure-authjs.session-token')?.value ||
+    req.cookies.get('next-auth.session-token')?.value ||
+    req.cookies.get('__Secure-next-auth.session-token')?.value
+
+  if (!sessionToken) {
     return NextResponse.redirect(new URL('/auth/login', req.url))
   }
 
