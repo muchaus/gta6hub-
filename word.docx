@@ -1,0 +1,120 @@
+import docx
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Inches, Pt, RGBColor
+
+
+def criar_tcc_docx():
+    doc = docx.Document()
+
+    # Configuração de Margens (ABNT: Superior 3cm, Esquerda 3cm, Inferior 2cm, Direita 2cm)
+    sections = doc.sections
+    for section in sections:
+        section.top_margin = Inches(1.18)  # ~3cm
+        section.bottom_margin = Inches(0.79)  # ~2cm
+        section.left_margin = Inches(1.18)  # ~3cm
+        section.right_margin = Inches(0.79)  # ~2cm
+
+    # Configuração de Estilo Padrão
+    style = doc.styles["Normal"]
+    font = style.font
+    font.name = "Arial"
+    font.size = Pt(12)
+    font.color.rgb = RGBColor(0, 0, 0)
+
+    # Capa / Cabeçalho
+    p_inst = doc.add_paragraph()
+    p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p_inst.add_run(
+        "FUNDACE – FUNDAÇÃO PARA PESQUISA E DESENVOLVIMENTO DA ADMINISTRAÇÃO, CONTABILIDADE E ECONOMIA\n"
+    )
+    run.bold = True
+
+    p_title = doc.add_paragraph()
+    p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_t = p_title.add_run(
+        "\nESTUDO DE VIABILIDADE DE UM NEGÓCIO EDUCACIONAL DIGITAL\n\n"
+    )
+    run_t.bold = True
+    run_t.font.size = Pt(14)
+
+    p_autor = doc.add_paragraph()
+    p_autor.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_autor.add_run(
+        "Autor: Zulqarnain Haider\nRibeirão Preto – SP\n2026\n\n"
+    ).bold = True
+
+    doc.add_page_break()
+
+    # Conteúdo Principal
+    conteudo = [
+        ("1. RESUMO EXECUTIVO", "Heading 1"),
+        (
+            "O presente trabalho propõe a criação da plataforma Viktor Online, iniciativa concebida como extensão estratégica do Colégio Viktor Frankl, instituição consolidada no cenário educacional por sua proposta formativa centrada na pedagogia do sentido e na valorização integral da pessoa. Ao longo de sua trajetória, o colégio construiu uma identidade marcada pelo compromisso com a formação acadêmica aliada ao desenvolvimento humano, emocional e ético. A proposta nasce justamente desse mesmo eixo formativo, mas com um novo alcance: ampliar fronteiras, superar limites geográficos e oferecer experiências educacionais significativas por meio do ambiente digital.",
+            "Normal",
+        ),
+        (
+            "O projeto está inserido no segmento de cursos livres online, com foco em áreas de alta demanda contemporânea, como idiomas, redação, finanças pessoais e desenvolvimento emocional. A proposta consiste em um modelo que combina tecnologia educacional com proximidade humana. A experiência do aluno é pensada para preservar a essência relacional que caracteriza o colégio: acompanhamento próximo, metodologias ativas, linguagem acessível e ambiente virtual acolhedor, estruturando percursos formativos que estimulem reflexão, autonomia e aplicabilidade prática.",
+            "Normal",
+        ),
+        (
+            "A viabilidade do negócio foi analisada a partir das projeções financeiras apresentadas no Capítulo 4. Os indicadores demonstram crescimento progressivo das receitas, manutenção de margens operacionais positivas e geração de fluxo de caixa suficiente para sustentar a operação e remunerar o capital investido. O ponto de equilíbrio situa-se em patamar inferior à capacidade projetada de vendas, indicando margem de segurança operacional. Além disso, a estrutura de financiamento prioriza capital próprio (70%), reduzindo a exposição a riscos financeiros e fortalecendo a sustentabilidade do empreendimento no médio prazo.",
+            "Normal",
+        ),
+        ("2. DIAGNÓSTICO ESTRATÉGICO", "Heading 1"),
+        (
+            "O diagnóstico estratégico do Viktor Online parte de uma reflexão cuidadosa sobre a posição que o projeto pretende ocupar no mercado educacional digital. Não se trata apenas de lançar uma nova plataforma de cursos, mas de expandir, para o ambiente online, uma identidade institucional já consolidada pelo Colégio Viktor Frankl. Essa origem institucional é o ponto de partida para compreender como o projeto irá competir, quais riscos enfrenta e quais oportunidades pode aproveitar.",
+            "Normal",
+        ),
+        ("3. PLANO ESTRATÉGICO", "Heading 1"),
+        ("3.1 Tecnologia da Informação", "Heading 2"),
+        (
+            "A tecnologia da informação, no contexto do Viktor Online, é a base concreta que sustenta a proposta pedagógica no ambiente digital. Se, no colégio presencial, a sala de aula organiza o encontro entre professor e aluno, no projeto online é a infraestrutura tecnológica que viabiliza essa experiência, garantindo que o conteúdo chegue com qualidade, segurança e consistência.",
+            "Normal",
+        ),
+        ("3.2 Marketing", "Heading 2"),
+        (
+            "O marketing do Viktor Online nasce da própria identidade institucional e reflete aquilo que a escola já construiu ao longo do tempo: credibilidade, consistência pedagógica e proximidade com as famílias.",
+            "Normal",
+        ),
+        ("3.3 Operações e Produção", "Heading 2"),
+        (
+            "As operações do Viktor Online representam um desdobramento natural da estrutura pedagógica e organizacional já consolidada pelo Colégio Viktor Frankl.",
+            "Normal",
+        ),
+        ("3.4 Recursos Humanos", "Heading 2"),
+        (
+            "O projeto Viktor Online depende da estrutura humana já consolidada no Colégio Viktor Frankl. A cultura organizacional, marcada pela valorização da pessoa, pela gestão participativa e pelo compromisso com a formação integral, permite que a expansão para o ambiente digital ocorra com coerência e responsabilidade.",
+            "Normal",
+        ),
+        ("4. PLANO FINANCEIRO", "Heading 1"),
+        (
+            "A gestão financeira eficaz de um empreendimento depende da elaboração de um orçamento empresarial consistente, do controle dos custos operacionais e de um planejamento tributário estratégico (Silva; Moreira, 2025). Este capítulo apresenta a estrutura detalhada dos custos envolvidos no projeto, as despesas previstas para o período de cinco anos, a depreciação dos ativos imobilizados, a margem de contribuição, o ponto de equilíbrio e o enquadramento tributário.",
+            "Normal",
+        ),
+        ("5. VIABILIDADE DO NEGÓCIO", "Heading 1"),
+        (
+            "A análise de viabilidade do projeto fundamenta-se nos indicadores financeiros apresentados no Plano Financeiro, considerando o investimento inicial de R$ 225.000,00 e a Taxa Mínima de Atratividade (TMA) estabelecida em 12% ao ano. Para conferir maior rigor analítico, foram formulados três cenários: Real (Base), Otimista (+20% na geração de caixa) e Pessimista (-30% na geração de caixa).",
+            "Normal",
+        ),
+        ("6. REFERÊNCIAS BIBLIOGRÁFICAS", "Heading 1"),
+        (
+            "BALLOU, Ronald H. Logística empresarial: transportes, administração de materiais e distribuição física. São Paulo: Atlas, 1993.\n\n"
+            "FRANKL, Viktor E. Psicoterapia e sentido da vida: fundamentos da logoterapia e análise existencial. 6. ed. São Paulo: Quadrante, 2016.\n\n"
+            "MARION, José Carlos. Contabilidade básica. 13. ed. Barueri: Atlas, 2025.\n\n"
+            "SILVA, Laiane Rodrigues; MOREIRA, Ana Zenilce. A importância da contabilidade gerencial e do planejamento estratégico nas micro e pequenas empresas. Revista Ibero-Americana de Humanidades, Ciências e Educação, v. 11, n. 1, 2025.",
+            "Normal",
+        ),
+    ]
+
+    for item, estilo in conteudo:
+        p = doc.add_paragraph(item, style=estilo)
+        p.paragraph_format.line_spacing = 1.5
+        p.paragraph_format.space_after = Pt(6)
+
+    doc.save("86893_109_correcao.docx")
+    print("Arquivo '86893_109_correcao.docx' gerado com sucesso!")
+
+
+if __name__ == "__main__":
+    criar_tcc_docx()

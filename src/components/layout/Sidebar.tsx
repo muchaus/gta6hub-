@@ -18,6 +18,8 @@ export default function Sidebar({ userClans = [] }: SidebarProps) {
 
   const nav = [
     { href: '/feed', icon: '⌂', label: 'Início' },
+    { href: '/news-wire', icon: '📰', label: 'GTA6Wire' },
+    { href: '/timeline', icon: '◉', label: 'Timeline' },
     { href: '/profile/me', icon: '◉', label: 'Meu Perfil' },
     { href: '/clans', icon: '◈', label: 'Clãs' },
     { href: '/lfg', icon: '◎', label: 'LFG' },

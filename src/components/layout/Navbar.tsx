@@ -10,6 +10,7 @@ export default function Navbar() {
 
   const links = [
     { href: '/feed', label: 'Feed' },
+    { href: '/news-wire', label: 'GTA6Wire' },
     { href: '/clans', label: 'Clãs' },
     { href: '/lfg', label: 'LFG' },
   ]
@@ -40,6 +41,15 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {session?.user && (
             <>
+              <Link
+                href="/bookmarks"
+                className="hidden sm:flex items-center gap-1.5 bg-[#1a1628] border border-[#2d2050] rounded-full px-3 py-1 text-xs text-[#b9a7ff] hover:bg-[#241d3a] hover:text-[#e8c84a] transition-colors"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                Salvos
+              </Link>
               {(session.user as any).psnId && (
                 <span className="hidden sm:flex items-center gap-1.5 bg-[#0a2035] border border-[#1a4a7a] rounded-full px-3 py-1 text-xs text-[#5b9fd4]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8.985 2.596v17.548l3.915 1.261V6.688c0-.69.304-1.151.794-.999.636.198.762.89.762 1.58v5.584l3.915 1.256V7.522c0-3.294-2.024-4.83-4.954-3.753z"/><path d="M.006 17.34l4.141 1.738L13.012 21v-3.165l-5.987-2.135-.007-2.18L13.012 15V11.87L.006 7.598z"/></svg>

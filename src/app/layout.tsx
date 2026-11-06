@@ -9,6 +9,19 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'GTA6Hub — Comunidade',
   description: 'A comunidade brasileira do GTA 6. Forme clãs, encontre jogadores e fique por dentro das novidades.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    siteName: 'GTA6Hub',
+    images: ['/Drift_icon.png']
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@GTA6Hub'
+  },
+  manifest: '/manifest.json',
+  themeColor: '#fdb813'
 }
 
 export default async function RootLayout({

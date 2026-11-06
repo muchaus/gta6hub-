@@ -38,6 +38,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <main className="flex-1 min-w-0">{children}</main>
         </div>
       </div>
+      <div id="google_translate_element" style={{position:'fixed',bottom:16,right:16,zIndex:9999}} />
+      <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+      <script dangerouslySetInnerHTML={{__html: `function googleTranslateElementInit(){ new google.translate.TranslateElement({pageLanguage:'pt', includedLanguages:'en,es,fr,de,it,ja,ko,ru', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay:false}, 'google_translate_element'); }`}} />
     </>
   )
 }

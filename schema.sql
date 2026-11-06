@@ -74,3 +74,54 @@ CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id);
 CREATE INDEX IF NOT EXISTS idx_clan_members_clan ON clan_members(clan_id);
 CREATE INDEX IF NOT EXISTS idx_clan_members_user ON clan_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_follows_follower ON follows(follower_id);
+
+-- Tabela de notícias agregadas (usada pelo GTA6Wire)
+CREATE TABLE IF NOT EXISTS gta_news (
+  id           TEXT PRIMARY KEY,
+  title        TEXT NOT NULL,
+  excerpt      TEXT,
+  link         TEXT UNIQUE NOT NULL,
+  image        TEXT,
+  source_id    TEXT NOT NULL,
+  source_name  TEXT NOT NULL,
+  source_slug  TEXT NOT NULL,
+  source_color TEXT,
+  category     TEXT DEFAULT 'news',
+  published_at INTEGER,
+  created_at   INTEGER DEFAULT (strftime('%s','now')),
+  is_rumor     INTEGER DEFAULT 0,
+  is_confirmed INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_gta_news_published_at ON gta_news(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_gta_news_source ON gta_news(source_slug);
+
+-- Bookmarks de notícias (usuário salva notícia pra ler depois)
+CREATE TABLE IF NOT EXISTS news_bookmarks (
+  id          TEXT PRIMARY KEY,
+  user_id     TEXT NOT NULL,
+  news_id     TEXT NOT NULL,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, news_id)
+);
+CREATE INDEX IF NOT EXISTS idx_news_bookmarks_user ON news_bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_news_bookmarks_news ON news_bookmarks(news_id);
+
+-- Comentários em notícias agregadas
+CREATE TABLE IF NOT EXISTS news_comments (
+  id          TEXT PRIMARY KEY,
+  news_id     TEXT NOT NULL,
+  user_id     TEXT NOT NULL,
+  content     TEXT NOT NULL,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_news_comments_news ON news_comments(news_id);
+CREATE INDEX IF NOT EXISTS idx_news_comments_user ON news_comments(user_id);
+
+-- Newsletter (inscritos por email)
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id          TEXT PRIMARY KEY,
+  email       TEXT NOT NULL UNIQUE,
+  name        TEXT,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter_subscribers(email);
