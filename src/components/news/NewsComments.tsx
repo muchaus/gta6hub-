@@ -1,6 +1,5 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 
 interface NewsComment {
@@ -12,7 +11,6 @@ interface NewsComment {
 }
 
 export default function NewsComments({ newsId }: { newsId: string }) {
-  const { data: session } = useSession()
   const [comments, setComments] = useState<NewsComment[]>([])
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
@@ -81,28 +79,22 @@ export default function NewsComments({ newsId }: { newsId: string }) {
       </div>
 
       <div className="pt-4 border-t border-[#1e1e2e]/40">
-        {session?.user ? (
-          <form onSubmit={addComment} className="flex gap-2">
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Escreva um comentário..."
-              className="flex-1 min-h-[60px] resize-y rounded-xl border border-[#1e1e2e] bg-[#0a0a0f] px-3 py-2 text-sm text-neutral-200 focus:border-[#e8c84a] focus:outline-none"
-              disabled={loading}
-            />
-            <button
-              type="submit"
-              disabled={loading || !content.trim()}
-              className="px-4 py-2 rounded-xl bg-[#e8c84a] text-black font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Comentar
-            </button>
-          </form>
-        ) : (
-          <div className="flex items-center gap-2 text-xs text-neutral-500 bg-[#13131d]/50 rounded-xl px-3 py-2 border border-[#1e1e2e]/40">
-            <span>Faça login para comentar</span>
-          </div>
-        )}
+        <form onSubmit={addComment} className="flex gap-2">
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Escreva um comentário..."
+            className="flex-1 min-h-[60px] resize-y rounded-xl border border-[#1e1e2e] bg-[#0a0a0f] px-3 py-2 text-sm text-neutral-200 focus:border-[#e8c84a] focus:outline-none"
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={loading || !content.trim()}
+            className="px-4 py-2 rounded-xl bg-[#e8c84a] text-black font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Comentar
+          </button>
+        </form>
       </div>
     </div>
   )

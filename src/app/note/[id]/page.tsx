@@ -1,13 +1,12 @@
 import NewsComments from '@/components/news/NewsComments'
-import { auth } from '@/lib/auth'
 import db from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
-export async function metadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const { id } = params
+export async function metadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
   let news: any = null
   try {
     const safeId = id.replace(/'/g, "''")
@@ -37,8 +36,8 @@ export async function metadata({ params }: { params: { id: string } }): Promise<
   }
 }
 
-export default async function NotePage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default async function NotePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
 
   let news: any = null
   try {
@@ -50,8 +49,6 @@ export default async function NotePage({ params }: { params: { id: string } }) {
   }
 
   if (!news) notFound()
-
-  const session = await auth()
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
@@ -96,22 +93,6 @@ export default async function NotePage({ params }: { params: { id: string } }) {
       <article className="border border-[#1e1e2e] rounded-2xl bg-[#13131d] p-6 sm:p-8">
         <NewsComments newsId={news.id} />
       </article>
-
-      {session && (
-        <div className="rounded-xl border border-[#1e1e2e] bg-[#1a1628] p-4">
-          <button
-            onClick={() => {
-              // toggle bookmark via client - handled by NewsCard, here just a placeholder
-            }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[#2d2050] text-sm text-[#e8c84a] hover:bg-[#241d3a] transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-            </svg>
-            Salvar notícia
-          </button>
-        </div>
-      )}
     </div>
   )
 }

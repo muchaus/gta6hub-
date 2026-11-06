@@ -4,7 +4,6 @@ import Link from 'next/link'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/pt-br'
-import { useState } from 'react'
 
 dayjs.extend(relativeTime)
 dayjs.locale('pt-br')
@@ -22,13 +21,10 @@ interface NewsItem {
   category?: string
   is_rumor?: number
   is_confirmed?: number
-  bookmarked?: boolean
-  comments_count?: number
 }
 
 export default function NewsCard({ item }: { item: NewsItem }) {
   const timeAgo = item.published_at ? dayjs.unix(item.published_at).fromNow() : ''
-  const [bookmarked, setBookmarked] = useState(item.bookmarked ?? false)
 
   const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
     rumor: { label: 'RUMOR', color: 'text-pink-neon border-pink-neon/40 bg-pink-neon/10' },
@@ -39,18 +35,6 @@ export default function NewsCard({ item }: { item: NewsItem }) {
   const config = CATEGORY_CONFIG[item.category || 'news'] || CATEGORY_CONFIG.news
   const isRumor = item.is_rumor === 1
   const isConfirmed = item.is_confirmed === 1
-
-  async function toggleBookmark() {
-    try {
-      const url = bookmarked
-        ? `/api/news/bookmarks?newsId=${encodeURIComponent(item.id)}`
-        : '/api/news/bookmarks'
-      const res = await fetch(url, { method: bookmarked ? 'DELETE' : 'POST' })
-      if (res.ok) setBookmarked(!bookmarked)
-    } catch (e) {
-      console.error('Erro ao alternar bookmark:', e)
-    }
-  }
 
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-[#1e1e2e] bg-[#13131d] transition-all hover:-translate-y-0.5 hover:border-[#2d2050] hover:shadow-[0_0_0_1px_rgba(232,200,74,0.08)]">
@@ -85,25 +69,14 @@ export default function NewsCard({ item }: { item: NewsItem }) {
             )}
           </div>
         </Link>
-        <div className="flex items-center justify-end gap-2 pt-2 sm:pt-0 border-t border-[#1e1e2e]/50 sm:border-t-0 sm:border-l border-[#1e1e2e]/50">
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-neutral-600 group-hover:text-[#e8c84a] hover:underline transition-colors"
-          >
-            Ler na fonte →
-          </a>
-          <button
-            onClick={toggleBookmark}
-            className={`p-1.5 rounded-md transition-colors ${bookmarked ? 'text-[#e8c84a] bg-[#e8c84a]/10' : 'text-neutral-500 hover:text-[#e8c84a] hover:bg-[#e8c84a]/10'}`}
-            aria-label={bookmarked ? 'Remover dos salvos' : 'Salvar notícia'}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-            </svg>
-          </button>
-        </div>
+        <a
+          href={item.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-neutral-600 group-hover:text-[#e8c84a] hover:underline transition-colors"
+        >
+          Ler na fonte →
+        </a>
       </div>
     </article>
   )
