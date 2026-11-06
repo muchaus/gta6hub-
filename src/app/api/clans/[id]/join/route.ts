@@ -4,12 +4,13 @@ import db from '@/lib/db'
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const clanId = params.id.replace(/'/g, "''")
+  const { id } = await params
+  const clanId = id.replace(/'/g, "''")
   const userId = (session.user.id ?? '').replace(/'/g, "''")
 
   try {

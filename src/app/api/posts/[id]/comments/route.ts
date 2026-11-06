@@ -8,7 +8,7 @@ const schema = z.object({
   image_url: z.string().url().optional().or(z.literal('')),
 })
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
@@ -17,7 +17,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const parsed = schema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: 'Inválido' }, { status: 400 })
 
-    const postId = params.id.replace(/'/g, "''")
+    const { id } = await params
+    const postId = id.replace(/'/g, "''")
     const userId = (session.user.id ?? '').replace(/'/g, "''")
     const content = parsed.data.content.replace(/'/g, "''")
     const imageUrl = (parsed.data.image_url ?? '').replace(/'/g, "''")

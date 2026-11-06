@@ -1,14 +1,12 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { SessionProvider } from 'next-auth/react'
-import { auth } from '@/lib/auth'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'GTA6Hub — Comunidade',
-  description: 'A comunidade brasileira do GTA 6. Forme clãs, encontre jogadores e fique por dentro das novidades.',
+  title: 'GTA6Hub — Notícias GTA 6',
+  description: 'Portal de notícias do GTA 6 agregando os melhores portais em um só lugar. Sem login, sem assinatura.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   openGraph: {
     type: 'website',
@@ -24,19 +22,15 @@ export const metadata: Metadata = {
   themeColor: '#fdb813'
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
-
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        <SessionProvider session={session}>
-          {children}
-        </SessionProvider>
+        {children}
       </body>
     </html>
   )
